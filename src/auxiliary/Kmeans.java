@@ -24,6 +24,8 @@ public class Kmeans {
         if (numIns == 0) return;
         int numAtt = features[0].length;
         
+        kill_missing_data(features, numIns, numAtt);
+        
         //随机初始化中心点
         Random random = new Random();
         HashSet<Integer> checker = new HashSet<Integer>();
@@ -35,6 +37,9 @@ public class Kmeans {
             checker.add(center);
             
             clusterCenters[i] = features[center].clone();
+        }
+        for (int i = 0; i < numIns; ++i) {
+            clusterIndex[i] = -1;
         }
         
         //迭代更新
@@ -110,5 +115,32 @@ public class Kmeans {
             result += (a[i] - b[i]) * (a[i] - b[i]);
         }
         return result;
+    }
+    
+    //缺失值简单处理为平均值
+    private void kill_missing_data(double[][] features, int numIns, int numAtt) {
+        double[] defaults = new double[numAtt];
+        
+        for (int i = 0; i < numAtt; ++i) {
+            int count = 0;
+            double total = 0;
+            for (int j = 0; j < numIns; ++j) {
+                if (!Double.isNaN(features[j][i])) {
+                    count++;
+                    total += features[j][i];
+                }
+            }
+            defaults[i] = total / count;
+        }
+        
+        //代换
+        for (int i = 0; i < numIns; ++i) {
+            for (int j = 0; j < numAtt; ++j) {
+                if (Double.isNaN(features[i][j])) {
+                    features[i][j] = defaults[j];
+                }
+            }
+        }
+        return;
     }
 }
